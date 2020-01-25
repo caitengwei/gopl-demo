@@ -1,5 +1,7 @@
 package bank
 
+import "sync"
+
 var deposits = make(chan int) // send amount to deposit
 var balances = make(chan int) // receive balance
 
@@ -20,3 +22,35 @@ func teller() {
 func init() {
 	go teller()
 }
+
+var (
+	mu 		sync.Mutex
+	balance int
+)
+
+func Withdraw(amount int) bool {
+	mu.Lock()
+	defer mu.Unlock()
+	deposit(-amount)
+	if balance < 0 {
+		deposit(amount)
+		return false // insufficient funds
+	}
+	return true
+}
+
+func DepositMutex(amount int) {
+	mu.Lock()
+	defer mu.Unlock()
+	deposit(amount)
+}
+
+func BalanceMutex() int {
+	mu.Lock()
+	defer mu.Unlock()
+	b := balance
+	return b
+}
+
+// This function requires that the lock be held.
+func deposit(amount int) { balance += amount }
