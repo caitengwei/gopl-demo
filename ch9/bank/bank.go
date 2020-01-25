@@ -24,7 +24,7 @@ func init() {
 }
 
 var (
-	mu 		sync.Mutex
+	mu 		sync.RWMutex
 	balance int
 )
 
@@ -46,8 +46,8 @@ func DepositMutex(amount int) {
 }
 
 func BalanceMutex() int {
-	mu.Lock()
-	defer mu.Unlock()
+	mu.RLock()
+	defer mu.RUnlock()
 	b := balance
 	return b
 }
